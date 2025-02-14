@@ -30,3 +30,7 @@ ENV/
 env.bak/
 venv.bak/
 /venv
+
+# others
+**/**/plugin.py 
+venv\Lib\site-packages\mkdocs_autorefs\plugin.py
