@@ -18,7 +18,7 @@ def create_parser() -> ArgumentParser:
         conflict_handler='resolve',
     )
 
-    # configurando as ocções do parser
+    # configurando as opções do parser
     config.init_parser(parser)
 
     return parser
