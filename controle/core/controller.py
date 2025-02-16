@@ -32,7 +32,6 @@ class ControllerHour:
         self._data: date
         self._hora: datetime
 
-    
     @property
     def carimbo(self) -> str:
         return self._carimbo
