@@ -8,13 +8,14 @@ def parse_date(date_str):
 def parse_time(time_str):
     return datetime.strptime(time_str, '%H:%M:%S').time()
 
-def to_timestamp(dt):
+def to_timestamp(dt: datetime) -> int:
     return int(dt.timestamp())
 
 def init_parser(parser: ArgumentParser) -> None:
     """
     Esta função configura as opções do parser de linha de comando para o pacote `cli`.
-    Aplicamos o pattern Factory Aplication para configurar o parser de linha de comando. 
+    Aplicado o pattern Factory Aplication para configurar o parser de linha de comando,
+    inspirado na aula <https://youtu.be/-qWySnuoaTM?si=cMB0YpU0GnBmlvrG> 
     """
     parser.add_argument(
         '--horario', type=str, 
@@ -23,9 +24,11 @@ def init_parser(parser: ArgumentParser) -> None:
         Este comando pode ser utilizado para registrar o horário de início e fim de um dia qualquer de trabalho.
         Ex.:
             %(prog)s horario '16/05/2025; 06:04:35 -> 13:56:41'
+            %(prog)s horario '16-05-2025; 06:04:35 -> 13:56:41'
+            %(prog)s horario '2025/05/16; 06:04:35 -> 13:56:41'
         ''', 
         nargs='?',
-        action='apend',
+        action='append',
         default=None,
     )
 
@@ -70,31 +73,3 @@ def init_parser(parser: ArgumentParser) -> None:
         default=datetime.now().strftime('%H:%M:%S'), 
         const=None
     )
-
-args = parser.parse_args()
-
-# Convertendo strings para datetime
-if args.data:
-    args.data = parse_date(args.data)
-else:
-    args.data = datetime.today()
-
-if args.inicio:
-    args.inicio = parse_time(args.inicio)
-else:
-    args.inicio = datetime.now().time()
-
-if args.final:
-    args.final = parse_time(args.final)
-else:
-    args.final = datetime.now().time()
-
-# Convertendo datetime para timestamp
-if args.data:
-    args.data_timestamp = to_timestamp(args.data)
-if args.inicio:
-    args.inicio_timestamp = to_timestamp(datetime.combine(args.data, args.inicio))
-if args.final:
-    args.final_timestamp = to_timestamp(datetime.combine(args.data, args.final))
-
-print(vars(args))
