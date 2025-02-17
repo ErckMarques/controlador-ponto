@@ -4,8 +4,8 @@ from typing import Literal, Union, Optional
 
 from dateparser import parse
 from controle.core.exceptions import DataFormatInvalidError, DataInvalidError
+from controle import CARIMBO
 
-CARIMBO = Literal['dd/mm/YYYY HH:MM:SS', 'dd-mm-YYYY HH:MM:SS', 'dd/mm/YYYY', 'dd-mm-YYYY', 'HH:MM:SS']
 
 class _ValidateData:
     """Esta classe é responsável por validar a data.
