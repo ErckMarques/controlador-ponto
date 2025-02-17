@@ -29,7 +29,7 @@ Se você não utiliza o git, acesse o link: [https://github.com/ErckMarques/cont
 
 Com os arquivos baixados podemos seguir para a instalação
 
-### Instalando a CLI 
+### Instalando a CLI
 
 Recomendo a instalação via pipx.
 
@@ -48,6 +48,10 @@ pipx install .
 
 Isto é suficiente para que a CLI já possa ser acessada, a partir de qualquer caminho no terminal. Isto só é possível porquê você executou o comando `python -m pip install ensurepath` que nos garante que os executáveis sejam colocados no Path do  sistema.
 
+#### Problema a corrigir
+
+Mesmo após instalar só é possível utilizar a CLI com o comando `pip -m controle [options]`
+
 ## Próximas Features
 
 * [ ] Suporte a controle de novas atividades, e.g.:
@@ -59,7 +63,7 @@ Isto é suficiente para que a CLI já possa ser acessada, a partir de qualquer c
   Controle de tempo de cozinha
 * [ ] Instalação com outras ferramentas como:
 
-  poetry 
+  poetry
 
   pipenv
 * [ ] Criação de uma GUI com Tkinter.
