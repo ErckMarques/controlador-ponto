@@ -50,7 +50,7 @@ Isto é suficiente para que a CLI já possa ser acessada, a partir de qualquer c
 
 #### Problema a corrigir
 
-Mesmo após instalar só é possível utilizar a CLI com o comando `pip -m controle [options]`
+Mesmo após instalar só é possível utilizar a CLI com o comando `python -m controle [options]`
 
 ## Próximas Features
 
