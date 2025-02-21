@@ -30,7 +30,14 @@ register_converter('CARIMBO', convert_carimbo)
 class RecordHour(AbstractContextManager):
     """
     Esta classe é responsável por registrar as informações de hora no banco de dados.
-    E pode ser utilizada como um gerenciador de contexto.
+    Ela representa uma linha de informação da tabela. E pode ser utilizada como um gerenciador de contexto.
+
+    Uso:
+        >>> horarios: iterable[Carimbo]
+
+        >>> for horario in horarios:
+        ...     with RecorHour(horario) as record:
+        ...         record.insert()
     """
     def __init__(self, carimbo: Tuple[CARIMBO], tabela: str = None) -> None:
         self._con: Optional[Connection] = None
@@ -70,6 +77,7 @@ class RecordHour(AbstractContextManager):
         return f'{self.__class__.__name__}(carimbo={self.carimbo}, tabela={self.tabela})'
     
     def _criar_tabela(self) -> None:
+        """Cria uma nova tabela no banco de dados com um nome de tabela fornecido no construtor da classe RecorHour"""
         self._cur.execute(f"""
         CREATE TABLE IF NOT EXISTS {self.tabela} (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
