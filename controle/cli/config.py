@@ -17,15 +17,17 @@ def init_parser(parser: ArgumentParser) -> None:
     Aplicado o pattern Factory Aplication para configurar o parser de linha de comando,
     inspirado na aula <https://youtu.be/-qWySnuoaTM?si=cMB0YpU0GnBmlvrG> 
     """
+
+    # registrar horário com início e fim de trabalho
     parser.add_argument(
         '--horario', type=str, 
         help='''
         Horário completo do dia a ser registrado.
-        Este comando pode ser utilizado para registrar o horário de início e fim de um dia qualquer de trabalho.
+        Este comando pode ser utilizado para registrar varios horários de início e fim de um dia qualquer de trabalho.
         Ex.:
-            %(prog)s horario '16/05/2025; 06:04:35 -> 13:56:41'
-            %(prog)s horario '16-05-2025; 06:04:35 -> 13:56:41'
-            %(prog)s horario '2025/05/16; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '16/05/2025; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '16-05-2025; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '2025/05/16; 06:04:35 -> 13:56:41'
         ''', 
         nargs='?',
         action='append',
@@ -41,11 +43,12 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -d 15/04/2006 ou %(prog)s --data 15-04-2006
         ''', 
-        nargs='?', 
+        nargs='+', 
         default=datetime.today().strftime('%Y-%m-%d'), 
         const='today'
     )
 
+    # hora de início do trabalho
     parser.add_argument(
         '-i', '--inicio', 
         type=str, 
@@ -55,11 +58,12 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -i 06:10:07 ou %(prog)s -inicio 06:10:07
         ''', 
-        nargs='?', 
+        nargs='+', 
         default=datetime.now().strftime('%H:%M:%S'), 
         const=None
     )
 
+    # hora de finalização do trabalho
     parser.add_argument(
         '-f', '--final', 
         type=str, 
@@ -72,4 +76,12 @@ def init_parser(parser: ArgumentParser) -> None:
         nargs='?', 
         default=datetime.now().strftime('%H:%M:%S'), 
         const=None
+    )
+
+    # nome do usuário que está registrando o horário
+    parser.add_argument(
+        '-u', '--user',
+        type=str,
+        help='Nome do usuário a ser associado ao registro.',
+        default='erik',
     )
