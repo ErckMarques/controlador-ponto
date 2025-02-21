@@ -21,11 +21,11 @@ def init_parser(parser: ArgumentParser) -> None:
         '--horario', type=str, 
         help='''
         Horário completo do dia a ser registrado.
-        Este comando pode ser utilizado para registrar o horário de início e fim de um dia qualquer de trabalho.
+        Este comando pode ser utilizado para registrar varios horários de início e fim de um dia qualquer de trabalho.
         Ex.:
-            %(prog)s horario '16/05/2025; 06:04:35 -> 13:56:41'
-            %(prog)s horario '16-05-2025; 06:04:35 -> 13:56:41'
-            %(prog)s horario '2025/05/16; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '16/05/2025; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '16-05-2025; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '2025/05/16; 06:04:35 -> 13:56:41'
         ''', 
         nargs='?',
         action='append',
@@ -41,7 +41,7 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -d 15/04/2006 ou %(prog)s --data 15-04-2006
         ''', 
-        nargs='?', 
+        nargs='+', 
         default=datetime.today().strftime('%Y-%m-%d'), 
         const='today'
     )
@@ -55,7 +55,7 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -i 06:10:07 ou %(prog)s -inicio 06:10:07
         ''', 
-        nargs='?', 
+        nargs='+', 
         default=datetime.now().strftime('%H:%M:%S'), 
         const=None
     )
