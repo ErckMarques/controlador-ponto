@@ -39,15 +39,20 @@ class RecordHour(AbstractContextManager):
         ...     with RecorHour(horario) as record:
         ...         record.insert()
     """
-    def __init__(self, carimbo: Tuple[CARIMBO], tabela: str = None) -> None:
+    def __init__(self, carimbo: Tuple[CARIMBO], tabela: str = None, user: Optional[str] = None) -> None:
         self._con: Optional[Connection] = None
         self._cur: Optional[Cursor] = None
         self.carimbo = carimbo
-        self.tabela = 'horario' if tabela is None else tabela
+        self.tabela = 'horario_' if tabela is None else tabela
+        self._user = user
 
     @property
     def con(self) -> Connection:
         return self._con
+    
+    @property
+    def user(self) -> str:
+        return self._user
     
     def __del__(self) -> None:
         if self.con is not None:
@@ -74,7 +79,7 @@ class RecordHour(AbstractContextManager):
                 self.con.close()
     
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(carimbo={self.carimbo}, tabela={self.tabela})'
+        return f'{self.__class__.__name__}(carimbo={self.carimbo}, tabela={self.tabela + self.user})'
     
     def _criar_tabela(self) -> None:
         """Cria uma nova tabela no banco de dados com um nome de tabela fornecido no construtor da classe RecorHour"""
