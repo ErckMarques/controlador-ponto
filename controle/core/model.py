@@ -11,6 +11,7 @@ def adapt_carimbo(carimbo: Tuple[CARIMBO]) -> str:
     """
     Adapta um carimbo (tupla de dois timestamps) para uma string no formato SQLite.
     """
+    inicio: datetime; final: datetime
     inicio, final = carimbo
     return f"{inicio.isoformat()},{final.isoformat()}"
 
@@ -48,10 +49,12 @@ class RecordHour(AbstractContextManager):
 
     @property
     def con(self) -> Connection:
+        """Retorna o objeto de conexão com o banco de dados."""
         return self._con
     
     @property
     def user(self) -> str:
+        """Retorna o nome do usuário."""
         return self._user
     
     def __del__(self) -> None:
@@ -84,7 +87,7 @@ class RecordHour(AbstractContextManager):
     def _criar_tabela(self) -> None:
         """Cria uma nova tabela no banco de dados com um nome de tabela fornecido no construtor da classe RecorHour"""
         self._cur.execute(f"""
-        CREATE TABLE IF NOT EXISTS {self.tabela} (
+        CREATE TABLE IF NOT EXISTS {self.tabela + self.user} (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
         inicio TIMESTAMP NOT NULL, 
         final TIMESTAMP NOT NULL
@@ -92,18 +95,21 @@ class RecordHour(AbstractContextManager):
         """)
 
     def connect(self) -> None:
+        """Conecta ao banco de dados."""
         if self.con is None:
             self._con = connect(INSTANCE_PATH.joinpath('controle.db'))
             self._cur = self._con.cursor()
             self._criar_tabela()
 
     def close(self) -> None:
+        """Fecha o cursor e a conexão com o banco de dados."""
         if self.con is not None:
             if self._cur is not None:
                 self._cur.close()
             self.con.close()
     
-    def insert(self) -> None:        
+    def insert(self) -> None: 
+        """Insere o carimbo recebido no construtor como um novo registro na tabela."""       
         try:
             self._cur.execute(f"INSERT INTO {self.tabela} (inicio, final) VALUES (?, ?)", (*self.carimbo,))
         except Error as e:
