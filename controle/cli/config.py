@@ -4,10 +4,10 @@ O design da função `init_parser` foi inspirado no pattern `Aplication Factory`
 
 O parser é configurado com as seguintes opções:
 - --horario: Aceita múltiplos valores no formato "data; hora_inicio -> hora_fim"
-- --data: Data no formato usual. Se não for informada, assume a data atual.
-- inicio: Hora de início no formato 'HH:MM'. Se não for informada, assume a hora atual.
-- final: Hora de finalização no formato 'HH:MM'. Se não for informada, assume 13:30.
-- --user: Nome do usuário. Se não for informado, assume 'erik'.
+- --data, -d: Data no formato usual. Se não for informada, assume a data atual.
+- --inicio, -i: Hora de início no formato 'HH:MM'. Se não for informada, assume a hora atual.
+- --final, -f: Hora de finalização no formato 'HH:MM'. Se não for informada, assume 13:30.
+- --user, -u: Nome do usuário. Se não for informado, assume 'erik'.
 
     Raises:
         ValueError: Erro ao fazer o parser na string de data.
@@ -19,7 +19,7 @@ from argparse import ArgumentParser, ArgumentTypeError
 from argparse import ONE_OR_MORE, OPTIONAL
 from datetime import datetime, time
 
-from dateparser import parse
+from dateutil.parser import parse
 
 def parse_date(date_str: str) -> datetime:
     """
@@ -82,12 +82,12 @@ def init_parser(parser: ArgumentParser) -> None:
         ''', 
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=datetime.now(),  # Valor padrão é a data atual
-        dist='data'
+        dest='data'
     )
 
     # inicio: Hora de início no formato 'HH:MM'. Se não for informada, assume a hora atual.
     parser.add_argument(
-        'inicio', '-i',  
+        '-i','--inicio',   
         type=parse_time,  # Converte a string para um objeto time
         help='''
         Hora de início de trabalho a ser registrada.
@@ -97,12 +97,12 @@ def init_parser(parser: ArgumentParser) -> None:
         ''', 
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=datetime.now().time(),  # Valor padrão é a hora atual
-        dist='hora_inicio',
+        dest='hora_inicio',
     )
 
     # final: Hora de finalização no formato 'HH:MM'. Se não for informada, assume 13:30.
     parser.add_argument(
-        'final', '-f', 
+        '-f', '--final', 
         type=parse_time,  # Converte a string para um objeto time
         help='''
         Hora de finalização de trabalho a ser registrada.
@@ -113,7 +113,7 @@ def init_parser(parser: ArgumentParser) -> None:
         ''', 
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=time(13, 30),  # Valor padrão é 13:30
-        dist='hora_final',
+        dest='hora_final',
     )
 
     # --user: Nome do usuário. Se não for informado, assume 'erik'.
@@ -122,7 +122,7 @@ def init_parser(parser: ArgumentParser) -> None:
         type=validate_username,  # Valida o nome de usuário
         help='Nome do usuário a ser associado ao registro.',
         default='erik',  # Valor padrão é 'erik'
-        dist='user',
+        dest='user',
         metavar='USERNAME',  # Nome do argumento na ajuda
     )
 
