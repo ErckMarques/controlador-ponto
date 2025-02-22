@@ -13,8 +13,8 @@ O parser é configurado com as seguintes opções:
         ValueError: Erro ao fazer o parser na string de data.
         ValueError: Erro ao fazer o parser na string de horário.
         ArgumentTypeError: Erro no nome de usuário.
-
 """
+
 from argparse import ArgumentParser, ArgumentTypeError
 from argparse import ONE_OR_MORE, OPTIONAL
 from datetime import datetime, time
@@ -61,11 +61,13 @@ def init_parser(parser: ArgumentParser) -> None:
         type=str, 
         help='''
         Horário completo do dia a ser registrado.
-        Este comando pode ser utilizado para registrar o horário de início e fim de um dia qualquer de trabalho.
+        Este comando pode ser utilizado para registrar varios horários de início e fim de um dia qualquer de trabalho.
         Ex.:
-            %(prog)s horario '16/05/2025; 06:04:35 -> 13:56:41'
-            %(prog)s horario '16-05-2025; 06:04:35 -> 13:56:41'
-            %(prog)s horario '2025/05/16; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '16/05/2025; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '16-05-2025; 06:04:35 -> 13:56:41'
+            %(prog)s --horario '2025/05/16; 06:04:35 -> 13:56:41'
+            %(prog)s --horario "16/05/2025; 06:04 -> 13:56"
+            %(prog)s --horario "16-05-2025; 06:04 -> 13:56"
         ''', 
         nargs=ONE_OR_MORE,  # 1 ou mais argumentos
         action='append',  # Cria uma lista de strings
@@ -82,9 +84,9 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -d 15/04/2006 ou %(prog)s --data 15-04-2006
         ''', 
-        nargs='?', 
-        default=datetime.today().strftime('%Y-%m-%d'), 
-        const='today'
+        nargs='+', 
+        nargs=OPTIONAL,  # 0 ou 1 argumento
+        default=datetime.now(),  # Valor padrão é a data atual
     )
 
     # inicio: Hora de início no formato 'HH:MM'. Se não for informada, assume a hora atual.
@@ -97,9 +99,10 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -i 06:10 ou %(prog)s -inicio 06:10
         ''', 
-        nargs='?', 
-        default=datetime.now().strftime('%H:%M:%S'), 
-        const=None
+        nargs='+',
+        nargs=OPTIONAL,  # 0 ou 1 argumento
+        default=datetime.now().time(),  # Valor padrão é a hora atual
+        dest='hora_inicio',
     )
 
     # final: Hora de finalização no formato 'HH:MM'. Se não for informada, assume 13:30.
