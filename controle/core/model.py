@@ -1,5 +1,5 @@
 from contextlib import AbstractContextManager
-from datetime import datetime
+from datetime import datetime, date, time
 from sqlite3 import connect, Connection, Cursor, Error, register_adapter, register_converter
 from sqlite3 import SQLITE_CONSTRAINT_NOTNULL, SQLITE_CONSTRAINT_PRIMARYKEY
 from typing import Self, Optional, Union, Tuple
@@ -40,10 +40,11 @@ class RecordHour(AbstractContextManager):
         ...     with RecorHour(horario) as record:
         ...         record.insert()
     """
-    def __init__(self, carimbo: Tuple[CARIMBO], tabela: str = None, user: Optional[str] = None) -> None:
+    def __init__(self, carimbo: Tuple[CARIMBO], tempo: time = None , tabela: str = None, user: Optional[str] = None) -> None:
         self._con: Optional[Connection] = None
         self._cur: Optional[Cursor] = None
         self.carimbo = carimbo
+        self._time = tempo
         self.tabela = 'horario_' if tabela is None else tabela
         self._user = user
 
@@ -90,7 +91,8 @@ class RecordHour(AbstractContextManager):
         CREATE TABLE IF NOT EXISTS {self.tabela + self.user} (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
         inicio TIMESTAMP NOT NULL, 
-        final TIMESTAMP NOT NULL
+        final TIMESTAMP NOT NULL,
+        tempo TEXT NOT NULL
         )
         """)
 
