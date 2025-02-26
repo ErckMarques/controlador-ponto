@@ -10,16 +10,41 @@ O parser é configurado com as seguintes opções:
 - --user, -u: Nome do usuário. Se não for informado, assume 'erik'.
 
     Raises:
+        ArgumentTypeError: Erro no nome de usuário.
+        FileExistError: Caminho não existente no sistema de arquivos.
         ValueError: Erro ao fazer o parser na string de data.
         ValueError: Erro ao fazer o parser na string de horário.
-        ArgumentTypeError: Erro no nome de usuário.
 """
 
 from argparse import ArgumentParser, ArgumentTypeError
 from argparse import ONE_OR_MORE, OPTIONAL
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
+from pathlib import Path
+from typing import List, Literal, Tuple
 
 from dateutil.parser import parse
+
+def tratar_horarios(horarios: List[Literal['dd/mm/yyyy; HH:MM -> HH:MM']]) -> List[Tuple[datetime, datetime, timedelta]]:
+    """
+    Esta função recebe uma lista de horarios e retorna-os como objetos datetiime.
+    """
+    from re import compile, Pattern
+    from dateutil.parser import parse
+    
+    tratados: List = list()
+    regex_data: Pattern = compile(r'^\d{2}/\d{2}/\d{4}')
+    regex_horas: Pattern = compile(r'\d{2}:\d{2}')
+
+    # para cada valor, extraímos a data e o horario
+    for hora in horarios:
+        data = regex_data.match(hora).group()
+        minutos = regex_horas.findall(hora)
+        # monta os horarios de inicio e final (data+hora)
+        inicio = parse(data + ' ' + minutos[0])
+        final = parse(data + ' ' + minutos[-1])
+        tratados.append((inicio, final, final - inicio))
+
+    return tratados
 
 def parse_date(date_str: str) -> datetime:
     """
@@ -39,6 +64,16 @@ def parse_time(time_str: str) -> time:
     except ValueError:
         raise ValueError(f"Horário inválido: {time_str}")
 
+def validate_path(str_path: str) -> Path:
+    """
+    Esta função valida e verifica a existência do caminho informado.
+    """
+    parsed = Path(str_path)
+    if not parsed.exists():
+        raise FileExistsError(f'O caminho: {parsed} não é existente no sistema de arquivos.')
+    
+    return parsed
+    
 def validate_username(username: str) -> str:
     """
     Valida o nome de usuário.
@@ -63,15 +98,29 @@ def init_parser(parser: ArgumentParser) -> None:
         Horário completo do dia a ser registrado.
         Este comando pode ser utilizado para registrar varios horários de início e fim de um dia qualquer de trabalho.
         Ex.:
-            %(prog)s --horario '16/05/2025; 06:04:35 -> 13:56:41'
-            %(prog)s --horario '16-05-2025; 06:04:35 -> 13:56:41'
-            %(prog)s --horario '2025/05/16; 06:04:35 -> 13:56:41'
-            %(prog)s --horario "16/05/2025; 06:04 -> 13:56"
-            %(prog)s --horario "16-05-2025; 06:04 -> 13:56"
+            %(prog)s --horario 16/05/2025; 06:04:35 -> 13:56:41 --horario 16-05-2025; 06:04:35 -> 13:56:41
+            %(prog)s --horario 2025/05/16; 06:04:35 -> 13:56:41
+            %(prog)s --horario 16/05/2025; 06:04 -> 13:56 --horario 16-05-2025; 06:04 -> 13:56
         ''', 
         nargs=ONE_OR_MORE,  # 1 ou mais argumentos
         action='append',  # Cria uma lista de strings
         default=None,
+        dest='horarios'
+    )
+
+    # --file: se houverem muitos registros, um caminho de arquivo .txt pode ser informado para que os dados sejam carregados
+    parser.add_argument(
+        '--file',
+        type=validate_path, # converte a string para um objeto path
+        help='''
+        Caminho para um arquivo .txt que contém horários completos de dias de trabalho.
+        Utilitário para quando "--horario" tiver muitos registros a serem computados.
+        Ex:
+            %(prog)s --file path/to/your/archive.txt
+        ''',
+        nargs=OPTIONAL, # 0 ou 1 argumento
+        default=None,
+        dest='file'
     )
 
     # --data: Data no formato usual. Se não for informada, assume a data atual.
@@ -99,7 +148,6 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -i 06:10 ou %(prog)s -inicio 06:10
         ''', 
-        nargs='+',
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=datetime.now().time(),  # Valor padrão é a hora atual
         dest='hora_inicio',
