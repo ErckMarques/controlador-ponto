@@ -34,3 +34,5 @@ venv.bak/
 # others
 **/**/plugin.py 
 venv\Lib\site-packages\mkdocs_autorefs\plugin.py
+todo.*
+TODO.*
