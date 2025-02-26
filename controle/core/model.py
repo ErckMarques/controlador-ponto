@@ -1,5 +1,5 @@
 from contextlib import AbstractContextManager
-from datetime import datetime, date, time
+from datetime import datetime, time, timedelta
 from sqlite3 import connect, Connection, Cursor, Error, register_adapter, register_converter
 from sqlite3 import SQLITE_CONSTRAINT_NOTNULL, SQLITE_CONSTRAINT_PRIMARYKEY
 from typing import Self, Optional, Union, Tuple
@@ -34,17 +34,23 @@ class RecordHour(AbstractContextManager):
     Ela representa uma linha de informação da tabela. E pode ser utilizada como um gerenciador de contexto.
 
     Uso:
-        >>> horarios: iterable[Carimbo]
+        >>> horarios: Union[List[CARIMBO, CARIMBO], Tuple[CARIMBO, CARIMBO
+        ]]
 
         >>> for horario in horarios:
         ...     with RecorHour(horario) as record:
         ...         record.insert()
     """
-    def __init__(self, carimbo: Tuple[CARIMBO], tempo: time = None , tabela: str = None, user: Optional[str] = None) -> None:
+    def __init__(self, 
+                 carimbo: Tuple[CARIMBO, CARIMBO], 
+                 tempo: Union[time, timedelta] = None , 
+                 tabela: str = None, 
+                 user: Optional[str] = None
+                ) -> None:
         self._con: Optional[Connection] = None
         self._cur: Optional[Cursor] = None
         self.carimbo = carimbo
-        self._time = tempo
+        self._tempo = tempo
         self.tabela = 'horario_' if tabela is None else tabela
         self._user = user
 
@@ -86,12 +92,12 @@ class RecordHour(AbstractContextManager):
         return f'{self.__class__.__name__}(carimbo={self.carimbo}, tabela={self.tabela + self.user})'
     
     def _criar_tabela(self) -> None:
-        """Cria uma nova tabela no banco de dados com um nome de tabela fornecido no construtor da classe RecorHour"""
+        """Cria uma nova tabela no banco de dados com um nome de tabela fornecido no construtor da classe"""
         self._cur.execute(f"""
         CREATE TABLE IF NOT EXISTS {self.tabela + self.user} (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        inicio TIMESTAMP NOT NULL, 
-        final TIMESTAMP NOT NULL,
+        inicio TEXT NOT NULL, 
+        final TEXT NOT NULL,
         tempo TEXT NOT NULL
         )
         """)
@@ -113,7 +119,7 @@ class RecordHour(AbstractContextManager):
     def insert(self) -> None: 
         """Insere o carimbo recebido no construtor como um novo registro na tabela."""       
         try:
-            self._cur.execute(f"INSERT INTO {self.tabela} (inicio, final) VALUES (?, ?)", (*self.carimbo,))
+            self._cur.execute(f"INSERT INTO {self.tabela} (inicio, final, tempo) VALUES (?, ?, ?)", (*self.carimbo, self._tempo))
         except Error as e:
             if e.sqlite_errorcode == SQLITE_CONSTRAINT_NOTNULL:
                 print("Erro: Tentativa de inserir um valor nulo em uma coluna NOT NULL.")

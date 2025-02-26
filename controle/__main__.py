@@ -22,6 +22,9 @@ def main():
             horarios = tratar_horarios(lines)
         
         # passar os dados para RecordHour
+        for h in horarios:
+            with RecordHour(carimbo=(h[0], h[1]), tempo=h[-1], user=args.user) as rec:
+                rec.insert()
         exit()
     
     # verifica se foi passado algum horario manualmente
@@ -30,6 +33,9 @@ def main():
         horarios = tratar_horarios(args.horarios)
 
         # passa os dados para RecordHour
+        for h in horarios:
+            with RecordHour(carimbo=(h[0], h[1]), tempo=h[-1], user=args.user) as rec:
+                rec.insert()
         exit()
         
     # monto os dados
