@@ -4,6 +4,7 @@ Este módulo realiza a configuração do pacote `cli` onde encontra-se o parser 
 from argparse import ArgumentParser
 
 from controle.cli import config
+from controle.cli.config import tratar_horarios
 
 def create_parser() -> ArgumentParser:
     """
