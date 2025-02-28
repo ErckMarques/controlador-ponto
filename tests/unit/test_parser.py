@@ -27,5 +27,8 @@ def test_valores_parser(parser: ArgumentParser):
     assert args.hora_inicio == time(6, 45)
     assert args.hora_final == time(21, 21)
 
-@pytest.skip()
-def test_opcao_horario_valor(parser: ArgumentParser): pass
+
+def test_opcao_horario_valor(parser: ArgumentParser):
+    
+    args = parser.parse_args('--horario 26/02/2025; 07:30 -> 14:23', '--horario 2023-02-25; 07:10 -> 13:30')
+    assert len(args.horarios) == 2
