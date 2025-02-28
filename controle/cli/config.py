@@ -133,7 +133,6 @@ def init_parser(parser: ArgumentParser) -> None:
         Ex.: 
             %(prog)s -d 15/04/2006 ou %(prog)s --data 15-04-2006
         ''', 
-        nargs='+', 
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=datetime.now(),  # Valor padrão é a data atual
     )
