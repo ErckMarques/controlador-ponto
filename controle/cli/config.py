@@ -15,8 +15,9 @@ O parser é configurado com as seguintes opções:
         ValueError: Erro ao fazer o parser na string de data.
         ValueError: Erro ao fazer o parser na string de horário.
 """
+import textwrap
 
-from argparse import ArgumentParser, ArgumentTypeError
+from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormatter, RawTextHelpFormatter
 from argparse import ONE_OR_MORE, OPTIONAL
 from datetime import datetime, time, timedelta
 from pathlib import Path
@@ -90,18 +91,32 @@ def init_parser(parser: ArgumentParser) -> None:
     """
     Configura as opções do parser de linha de comando.
     """
-    # --horario: Aceita múltiplos valores no formato "data; hora_inicio -> hora_fim"
-    parser.add_argument(
+    # Cria o subparser para o comando 'registro'
+    subparsers = parser.add_subparsers()
+
+    # Subparser para o comando 'registro'
+    registrer_parser = subparsers.add_parser(
+        'registrer',
+        help='Registrar uma atividade ou tarefa',
+        description='Registrar uma atividade ou tarefa com data, hora de início e finalização.',
+        formatter_class=RawTextHelpFormatter,
+        epilog=textwrap.dedent('''
+            Exemplo de uso:
+            $ hcontroll registrer --data "01/01/2023" --inicio "08:00" --final "12:00"
+        ''')
+    )
+
+    registrer_parser.add_argument(
         '--horario', 
         type=str, 
-        help='''
+        help=textwrap.dedent('''
         Horário completo do dia a ser registrado.
         Este comando pode ser utilizado para registrar varios horários de início e fim de um dia qualquer de trabalho.
         Ex.:
             %(prog)s --horario 16/05/2025; 06:04:35 -> 13:56:41 --horario 16-05-2025; 06:04:35 -> 13:56:41
             %(prog)s --horario 2025/05/16; 06:04:35 -> 13:56:41
             %(prog)s --horario 16/05/2025; 06:04 -> 13:56 --horario 16-05-2025; 06:04 -> 13:56
-        ''', 
+        '''), 
         nargs=ONE_OR_MORE,  # 1 ou mais argumentos
         action='append',  # Cria uma lista de strings
         default=None,
@@ -109,71 +124,92 @@ def init_parser(parser: ArgumentParser) -> None:
     )
 
     # --file: se houverem muitos registros, um caminho de arquivo .txt pode ser informado para que os dados sejam carregados
-    parser.add_argument(
+    registrer_parser.add_argument(
         '--file',
         type=validate_path, # converte a string para um objeto path
-        help='''
+        help=textwrap.dedent('''
         Caminho para um arquivo .txt que contém horários completos de dias de trabalho.
         Utilitário para quando "--horario" tiver muitos registros a serem computados.
         Ex:
             %(prog)s --file path/to/your/archive.txt
-        ''',
+        '''),
         nargs=OPTIONAL, # 0 ou 1 argumento
         default=None,
         dest='file'
     )
 
     # --data: Data no formato usual. Se não for informada, assume a data atual.
-    parser.add_argument(
+    registrer_parser.add_argument(
         '-d', '--data', 
         type=parse_date,  # Converte a string para um objeto datetime
-        help='''
+        help=textwrap.dedent('''
         Data a ser registrada.
         Quando não informada, a data padrão é a data de hoje.
         Ex.: 
             %(prog)s -d 15/04/2006 ou %(prog)s --data 15-04-2006
-        ''', 
-        nargs='+', 
+        '''), 
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=datetime.now(),  # Valor padrão é a data atual
     )
 
     # inicio: Hora de início no formato 'HH:MM'. Se não for informada, assume a hora atual.
-    parser.add_argument(
+    registrer_parser.add_argument(
         '-i','--inicio',   
         type=parse_time,  # Converte a string para um objeto time
-        help='''
+        help=textwrap.dedent('''
         Hora de início de trabalho a ser registrada.
         Quando não informada, a hora padrão é a hora atual.
         Ex.: 
             %(prog)s -i 06:10 ou %(prog)s -inicio 06:10
-        ''', 
+        '''), 
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=datetime.now().time(),  # Valor padrão é a hora atual
         dest='hora_inicio',
     )
 
     # final: Hora de finalização no formato 'HH:MM'. Se não for informada, assume 13:30.
-    parser.add_argument(
+    registrer_parser.add_argument(
         '-f', '--final', 
         type=parse_time,  # Converte a string para um objeto time
-        help='''
+        help=textwrap.dedent('''
         Hora de finalização de trabalho a ser registrada.
         Quando não informada, a hora padrão é 13:30.
         Ex.: 
             %(prog)s -f 18:49 ou %(prog)s --final 18:49
             %(prog)s -f (a hora final será 13:30)
-        ''', 
+        '''), 
         nargs=OPTIONAL,  # 0 ou 1 argumento
         default=time(13, 30),  # Valor padrão é 13:30
         dest='hora_final',
     )
 
+    report_subparser = subparsers.add_parser(
+        'report',
+        help='Gerar um relatório de atividades',
+        description='Gerar um relatório de atividades com base nos registros existentes.',
+        formatter_class=RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent('''
+            Exemplo de uso:
+            $ hcontroll report --data "01/01/2023"
+        ''')
+    )
+
+    config_subparser = subparsers.add_parser(
+        'config',
+        help='Configurar o ambiente de trabalho',
+        description='Configurar o ambiente de trabalho, como caminho do banco de dados e outras preferências.',
+        formatter_class=RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent('''
+            Exemplo de uso:
+            $ hcontroll config --db-path "/path/to/database.db"
+        ''')
+    )   
+
     # --user: Nome do usuário. Se não for informado, assume 'erik'.
-    parser.add_argument(
+    config_subparser.add_argument(
         '-u', '--user',
         type=validate_username,  # Valida o nome de usuário
-        help='Nome do usuário a ser associado ao registro.',
+        help=textwrap.dedent('''Nome do usuário a ser associado ao registro.'''),
         default='erik',  # Valor padrão é 'erik'
         dest='user',
         metavar='USERNAME',  # Nome do argumento na ajuda
